@@ -4,7 +4,7 @@
 
 #include <math.h>
 #include "gamedata.h"
-
+#include <set>
 
 class Player :public GameData
 {
@@ -29,7 +29,7 @@ public:
     Q_INVOKABLE void setLButton(bool val);
     Q_INVOKABLE bool playerMovingRight();
     Q_INVOKABLE bool playerMovingLeft();
-    Q_INVOKABLE bool collisionWithSkeleton();
+    Q_INVOKABLE bool collisionWithSkeleton(int idx);
     Q_INVOKABLE bool isRightPressed();
     Q_INVOKABLE bool isLeftPressed();
     Q_INVOKABLE void isAttacking(bool attack);
@@ -44,7 +44,7 @@ signals:
     int idxOfSkeletonAttack(int ios, bool dir);
     int idxOfSkeletonDirection(int ios, bool dir);
     int sendHealth(double health);
-    int PlayerAttacks(bool attack, int ios);
+    int playerAttacks(bool attack, int ios);
 
 
 

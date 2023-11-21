@@ -205,8 +205,13 @@ bool Player::playerMovingLeft()
 
 }
 
-bool Player::collisionWithSkeleton()
+bool Player::collisionWithSkeleton(int idx)
 {
+
+    static std::set<int> deadSkels{};
+    deadSkels.insert(idx);
+
+
     QJsonArray skelArr = getSKeletonPos();
     int sk_w = 40;
     int sk_h =50;
@@ -222,12 +227,26 @@ bool Player::collisionWithSkeleton()
         bool verOverlap = m_pos.ry() + m_h >= y-sk_h && m_pos.ry() + m_h < y + sk_h;
 
         emit idxOfSkeletonDirection(i, leftToPlayer);
+
+        if(deadSkels.find(i)==deadSkels.end())
+        {
         if(horOverlap &&verOverlap )
-           { emit PlayerAttacks(m_plAttacks, i); m_health-=0.075; emit idxOfSkeletonAttack(i, leftToPlayer); emit sendHealth(m_health); return true;}
+           {
+            emit playerAttacks(m_plAttacks, i);
+
+            if(!m_plAttacks)
+                m_health-=0.2;
+
+            emit idxOfSkeletonAttack(i, m_plAttacks);
+            emit sendHealth(m_health);
+            return true;
+        }
+        }
 
     }
 
     emit idxOfSkeletonAttack(-1, false);
+
 
 
 
