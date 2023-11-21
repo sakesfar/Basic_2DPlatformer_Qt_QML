@@ -27,7 +27,8 @@ Item {
 
            if (event.key === Qt.Key_1)
            {
-              Woo.isAttacking(false);
+               prolongAttack.start()
+              //Woo.isAttacking(false);
            }
 
 
@@ -39,8 +40,13 @@ Item {
         onPosYChanged : player.y =Woo.getPosY()
         onIdxOfSkeletonAttack:
         {
-            if(ios>=0)
+            if(ios>=0 && !dir)
             player.jumpTo("hit")
+
+            if(ios>=0 && dir)
+            {
+                player.jumpTo("fight")
+            }
         }
 
     }
@@ -100,7 +106,7 @@ Item {
             source:"/images/woo/woo.png"
             frameY: 256
             frameX:5
-            frameCount: 8 ; frameRate: 15
+            frameCount: 8 ; frameRate: 25
             frameWidth: 32
             frameHeight: 32
 
@@ -113,7 +119,7 @@ Item {
             source:"/images/woo/woo.png"
             frameY: 192
             frameX:5
-            frameCount: 3 ; frameRate: 5
+            frameCount: 3 ; frameRate: 4
             frameWidth: 32
             frameHeight: 32
 
@@ -185,6 +191,17 @@ Item {
         interval:25
         onTriggered: Woo.applyGravity()
     }
+
+    Timer {
+        id:prolongAttack
+        running:false
+        repeat:false
+        interval:100
+        onTriggered: Woo.isAttacking(false);
+    }
+
+
+
 
 
 
