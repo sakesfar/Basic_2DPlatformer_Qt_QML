@@ -10,6 +10,8 @@ Item {
     property int offsetX: modelData.offsetx
     x:offsetX
 
+
+
     Connections{
         target: Woo
         onPosXChanged : {outerDelegate.x=Woo.getMapX()+ offsetX ; }
@@ -23,6 +25,8 @@ Item {
         property real parallaxFactor:0.6
         model: tileData
         delegate: Foreground {}
+
+
 
 
     }

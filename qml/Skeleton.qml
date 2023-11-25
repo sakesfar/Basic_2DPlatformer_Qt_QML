@@ -33,7 +33,7 @@ Item {
         onIdxOfSkeletonAttack:{
             if(health>0)
             {
-            if(ios==index &&!dir)
+            if(ios==index &&!attacked)
             {
                 //directionRight=dir;
 
@@ -41,11 +41,10 @@ Item {
 
             }
 
-            if(ios==index &&dir)
+            if(ios==index &&attacked)
             {
                 sprite.jumpTo("hit");
                 health-=0.05;
-
             }
             }
 
@@ -54,13 +53,10 @@ Item {
                 if(ios==index)
                 {
                     sprite.jumpTo("death");
-                    isActive=false;
-
+                    deathTimer.start()
 
                 }
             }
-
-
 
 
         }
@@ -71,12 +67,6 @@ Item {
 
         }
 
-        onPlayerAttacks:
-        {
-
-
-
-        }
     }
 
 
@@ -177,11 +167,20 @@ Item {
         interval:10
         onTriggered: {
             skeleton.x=adjustPosX() ;
+             Woo.collisionWithSkeleton(-1);
 
-            if(!isActive)
-            Woo.collisionWithSkeleton(index);
-            else
-                Woo.collisionWithSkeleton(-1);
+        }
+    }
+
+    Timer {
+        id:deathTimer
+        running:false
+        interval:400
+        repeat:false
+        onTriggered:
+        {
+
+             {isActive=false;Woo.collisionWithSkeleton(index);}
 
         }
     }

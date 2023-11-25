@@ -3,6 +3,8 @@ import QtQuick.Controls 2.15
 
 Item {
     id:hBarStatus
+    property bool gameViewLoaded
+
 
 
     Connections{
@@ -30,6 +32,7 @@ Item {
         running: true
         interpolate: true
         scale:2.3
+        visible: gameViewLoaded
 
 
         Sprite{

@@ -3,12 +3,19 @@ import QtQuick.Controls 2.15
 
 Item {
 
-    Keys.onRightPressed: {Woo.moveRight(); spriteDir=true; Woo.setRButton(true);player.goalSprite="walking"}
+    Keys.onRightPressed: {Woo.moveRight(); spriteDir=true; Woo.setRButton(true);player.jumpTo("walking")}
     Keys.onLeftPressed: {Woo.moveLeft(); spriteDir=false; Woo.setLButton(true);player.goalSprite="walking"}
     Keys.onUpPressed: {Woo.jump() ; player.goalSprite="jumping"}
     Keys.onDigit1Pressed: {player.jumpTo("fight"); Woo.isAttacking(true) }
 
     property bool spriteDir:true
+
+    onFocusChanged: console.log("Player focus changed:", focus)
+
+    property bool gameViewLoaded
+
+
+
 
 
     Keys.onReleased:
@@ -16,13 +23,18 @@ Item {
            if (event.key === Qt.Key_Right)
            {
                Woo.setRButton(false)
-               player.goalSprite ="idle"
+               player.goalSprite="idle"
            }
 
            if (event.key === Qt.Key_Left)
            {
-               player.goalSprite ="idle"
+               player.goalSprite="idle"
                Woo.setLButton(false)
+           }
+
+           if (event.key === Qt.Key_Up)
+           {
+               player.goalSprite="idle"
            }
 
            if (event.key === Qt.Key_1)
@@ -30,6 +42,8 @@ Item {
                prolongAttack.start()
               //Woo.isAttacking(false);
            }
+
+
 
 
        }
@@ -40,10 +54,10 @@ Item {
         onPosYChanged : player.y =Woo.getPosY()
         onIdxOfSkeletonAttack:
         {
-            if(ios>=0 && !dir)
+            if(ios>=0 && !attacked)
             player.jumpTo("hit")
 
-            if(ios>=0 && dir)
+            if(ios>=0 && attacked)
             {
                 player.jumpTo("fight")
             }
@@ -61,6 +75,8 @@ Item {
         running: true
         interpolate: true
         scale:1.3
+        visible: gameViewLoaded
+
 
 
         Sprite{
@@ -84,7 +100,7 @@ Item {
             frameWidth: 32
             frameHeight: 32
 
-            to:{"idle":0, "jumping":0, "walking":1,"fight":0, "hit": 0, "death":0, "bug":0}
+            to:{"idle":1, "jumping":0, "walking":0,"fight":0, "hit": 0, "death":0, "bug":0}
 
         }
 
@@ -106,7 +122,7 @@ Item {
             source:"/images/woo/woo.png"
             frameY: 256
             frameX:5
-            frameCount: 8 ; frameRate: 25
+            frameCount: 8 ; frameRate: 16
             frameWidth: 32
             frameHeight: 32
 
@@ -176,11 +192,12 @@ Item {
 
     }
 
-    focus:true
+
 
     HealthBar{
         id:hbar
         anchors.fill: parent
+        gameViewLoaded: isGameViewLoaded
     }
 
 
