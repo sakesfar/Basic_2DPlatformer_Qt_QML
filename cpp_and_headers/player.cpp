@@ -254,7 +254,7 @@ bool Player::collisionWithSkeleton(int idx)
         bool verOverlap = m_pos.ry() + m_h >= y-sk_h && m_pos.ry() + m_h < y + sk_h;
 
         if(horOverlap &&verOverlap )
-        {m_health=0; break;}
+        {m_health=0; emit sendHealth(m_health); break;}
 
     }
 
