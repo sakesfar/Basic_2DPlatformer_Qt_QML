@@ -37,34 +37,51 @@ const QJsonArray &GameData::getLayers() const
     return m_layers;
 }
 
-QJsonArray GameData::getSKeletonPos()
+  QJsonArray GameData::getSKeletonPos()
 {
 
-    QJsonObject&& tempObj{};
+     QJsonObject&& tempObj{};
 
     for (int i =0 ; i<m_layers.size();++i)
     {
+
          tempObj = m_layers[i].toObject();
         if(tempObj["name"]=="Skeleton")
             break;
-
     }
 
-    QJsonArray&& arrOfSkel = !tempObj["objects"].isNull() ? tempObj["objects"].toArray() : QJsonArray{};
 
-    /*
-    for(int i =0 ; i < arrOfSkel.size();++i)
-    {
-        qDebug()<<arrOfSkel[i].toObject()["x"]<<' ';
-    }
-    */
 
-    return arrOfSkel;
+   QJsonArray&& arrOfSkel = !tempObj["objects"].isNull() ? tempObj["objects"].toArray() : QJsonArray{};
 
 
 
+   return arrOfSkel;
 
-}
+
+  }
+
+  QJsonArray GameData::getDeadZonePos()
+  {
+      QJsonObject&& tempObj{};
+
+     for (int i =0 ; i<m_layers.size();++i)
+     {
+
+          tempObj = m_layers[i].toObject();
+         if(tempObj["name"]=="DeadZone")
+             break;
+     }
+
+
+
+    QJsonArray&& arrOfDeadZone = !tempObj["objects"].isNull() ? tempObj["objects"].toArray() : QJsonArray{};
+
+
+
+    return arrOfDeadZone;
+
+  }
 
 double GameData::getCurrentTime()
 {

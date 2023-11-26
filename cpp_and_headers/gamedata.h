@@ -22,7 +22,8 @@ public:
 
     Q_INVOKABLE int getMapX();
     const QJsonArray& getLayers() const;
-    Q_INVOKABLE QJsonArray getSKeletonPos();
+    Q_INVOKABLE   QJsonArray getSKeletonPos();
+    Q_INVOKABLE   QJsonArray getDeadZonePos();
     double getCurrentTime();
 
 
