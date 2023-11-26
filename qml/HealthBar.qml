@@ -20,6 +20,12 @@ Item {
             if(health<150 &&health >75)
                 status.jumpTo("1")
 
+            if(health<150 &&health >75)
+                status.jumpTo("1")
+
+            if(health<=0 )
+                status.jumpTo("dead")
+
         }
     }
 
@@ -82,6 +88,19 @@ Item {
             frameDuration:100
 
             to:{"1":0, "2":0, "3":1 ,"full":0}
+
+        }
+
+        Sprite{
+            name:"dead"
+            source:"/images/woo/hbar.png"
+            frameX:128
+            frameCount: 1
+            frameWidth: 32
+            frameHeight: 20
+            frameDuration:100
+
+            to:{"1":0, "2":0, "3":0 ,"full":0, "dead":0}
 
         }
     }

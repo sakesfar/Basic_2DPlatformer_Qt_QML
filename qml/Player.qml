@@ -7,12 +7,18 @@ Item {
     Keys.onLeftPressed: {Woo.moveLeft(); spriteDir=false; Woo.setLButton(true);player.goalSprite="walking"}
     Keys.onUpPressed: {Woo.jump() ; player.goalSprite="jumping"}
     Keys.onDigit1Pressed: {player.jumpTo("fight"); Woo.isAttacking(true) }
-
-    property bool spriteDir:true
-
-    onFocusChanged: console.log("Player focus changed:", focus)
-
+    property bool spriteDir:true  
     property bool gameViewLoaded
+
+
+
+    function isDead()
+    {
+        if(Woo.getHealth()<=0)
+        {player.jumpTo("death");  gameLost.start()}
+
+
+    }
 
 
 
@@ -43,9 +49,6 @@ Item {
               //Woo.isAttacking(false);
            }
 
-
-
-
        }
 
     Connections{
@@ -54,12 +57,15 @@ Item {
         onPosYChanged : player.y =Woo.getPosY()
         onIdxOfSkeletonAttack:
         {
+            if(Woo.getHealth()>0)
+            {
             if(ios>=0 && !attacked)
             player.jumpTo("hit")
 
             if(ios>=0 && attacked)
             {
                 player.jumpTo("fight")
+            }
             }
         }
 
@@ -153,7 +159,7 @@ Item {
             frameWidth: 32
             frameHeight: 32
 
-            to:{"idle":0, "jumping":0, "walking":0,"fight":0, "hit": 0, "death":0, "bug":0}
+            to:{"idle":0, "jumping":0, "walking":0,"fight":0, "hit": 0, "death":0, "bug":0, "bug2":0}
         }
 
 
@@ -173,6 +179,19 @@ Item {
 
         Sprite{
             name:"bug2"
+            source:"/images/woo/woo.png"
+            frameY: 224
+            frameX:5
+            frameCount: 8 ; frameRate: 8
+            frameWidth: 32
+            frameHeight: 32
+
+            to:{"idle":0, "jumping":0, "walking":0,"fight":0, "hit": 0, "death":0, "bug":1}
+
+        }
+
+        Sprite{
+            name:"bug3"
             source:"/images/woo/woo.png"
             frameY: 224
             frameX:5
@@ -206,7 +225,7 @@ Item {
         running:true
         repeat:true
         interval:25
-        onTriggered: Woo.applyGravity()
+        onTriggered: {Woo.applyGravity() ; isDead() }
     }
 
     Timer {
@@ -216,6 +235,15 @@ Item {
         interval:100
         onTriggered: Woo.isAttacking(false);
     }
+
+    Timer{
+        id:gameLost
+        running:false
+        interval:50
+        onTriggered: isGameLost=true
+    }
+
+
 
 
 

@@ -6,6 +6,7 @@ Item {
     id:gameView
     //Component.onCompleted:  {pl.focus=true; console.log("WTF")}
     property bool isGameViewLoaded: false
+    property bool isGameLost:false
 
 
 
@@ -41,6 +42,26 @@ Item {
         delegate: Skeleton
         {
             id:skeletonItem
+        }
+
+    }
+
+    Rectangle{
+        id:gameLost
+        visible:isGameLost
+        anchors.centerIn: parent
+        width:100
+        height:50
+        color:"transparent"
+
+        Text{
+            anchors.centerIn:parent
+            text:"You lost!"
+            font.pixelSize: 25
+            font.bold: true
+            color:"red"
+
+
         }
 
     }

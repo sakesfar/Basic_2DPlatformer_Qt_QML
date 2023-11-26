@@ -46,6 +46,11 @@ Item {
                 sprite.jumpTo("hit");
                 health-=0.05;
             }
+
+            if(Woo.getHealth()<=0 &&ios==index)
+            {
+                sprite.jumpTo("idle");
+            }
             }
 
             else
