@@ -10,6 +10,8 @@ with all the major logic in C++ and QML for GUI.
 3. Implementing an archaic AI for enemies (?)
 4. Better UI
 5. Adding audio
+6. Debugging
+7. Optimizing the code
    
 Increasing the game map is a minor challenge
 
