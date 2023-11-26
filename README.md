@@ -9,6 +9,7 @@ with all the major logic in C++ and QML for GUI.
 2. Adding one or two more enemies
 3. Implementing an archaic AI for enemies (?)
 4. Better UI
+5. Adding audio
    
 Increasing the game map is a minor challenge
 
