@@ -33,6 +33,7 @@ public:
     Q_INVOKABLE bool isRightPressed();
     Q_INVOKABLE bool isLeftPressed();
     Q_INVOKABLE void isAttacking(bool attack);
+    Q_INVOKABLE int getHealth() const;
 
     bool collisionAtPosition(double newX, double newY);
 
@@ -41,7 +42,7 @@ signals:
 
     void posXChanged() ;
     void posYChanged() ;
-    int idxOfSkeletonAttack(int ios, bool dir);
+    int idxOfSkeletonAttack(int ios, bool attacked);
     int idxOfSkeletonDirection(int ios, bool dir);
     int sendHealth(double health);
     int playerAttacks(bool attack, int ios);

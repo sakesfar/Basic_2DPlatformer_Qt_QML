@@ -232,7 +232,7 @@ bool Player::collisionWithSkeleton(int idx)
         {
         if(horOverlap &&verOverlap )
            {
-            emit playerAttacks(m_plAttacks, i);
+            //emit playerAttacks(m_plAttacks, i);
 
             if(!m_plAttacks)
                 m_health-=0.2;
@@ -271,6 +271,11 @@ void Player::isAttacking(bool attack)
 {
 
     m_plAttacks=attack;
+}
+
+int Player::getHealth() const
+{
+    return m_health;
 }
 
 bool Player::collisionAtPosition(double newX, double newY)
