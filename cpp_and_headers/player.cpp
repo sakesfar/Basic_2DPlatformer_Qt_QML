@@ -250,8 +250,10 @@ bool Player::collisionWithSkeleton(int idx)
     {
         double x = deadZnArr[i].toObject()["x"].toDouble()+getMapX();
         double y = deadZnArr[i].toObject()["y"].toDouble();
-        bool horOverlap = m_pos.rx() + m_w >= x-20 && m_pos.rx() < x + sk_w;
-        bool verOverlap = m_pos.ry() + m_h >= y-sk_h && m_pos.ry() + m_h < y + sk_h;
+        double w = deadZnArr[i].toObject()["width"].toDouble();
+        double h = deadZnArr[i].toObject()["height"].toDouble();
+        bool horOverlap = m_pos.rx() +m_w  >= x && m_pos.rx() < x+w ;
+        bool verOverlap = m_pos.ry() + m_h >= y && m_pos.ry()  < y+h ;
 
         if(horOverlap &&verOverlap )
         {m_health=0; emit sendHealth(m_health); break;}
