@@ -16,7 +16,8 @@ with all the major logic in C++ and QML for GUI.
 Increasing the game map is a minor challenge
 
 **CONTROL KEYS:**
-*up/left/right* for movement and *1* for attack
+*/left/right* for movement and *1* for attack
+*space - jump 
 
 
 <img width="480" alt="girl2" src="https://github.com/sakesfar/Basic_2DPlatformer_Qt_QML/assets/121855106/42005aca-5fa9-4deb-b9cd-916fd60d1794">
