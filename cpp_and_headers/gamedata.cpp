@@ -4,89 +4,109 @@ GameData::GameData(QObject *parent)
     : QObject{parent}
 {
 
-
-
 }
 
-GameData::GameData(const QString& path , const QPoint& mapPos, int ww, int wh,int mW, int mH, QObject *parent) : m_mapPos{mapPos},
-    m_wndW{ww}, m_wndH{wh}, m_mapW{mW}, m_mapH{mH}
+GameData::GameData(const QString &path, int mapW, int mapH, QObject *parent) : m_mapW{GameConstants::mapW}, m_mapH{GameConstants::mapH*2}
 {
+    m_wndW=GameConstants::wndW;
+    m_wndH=GameConstants::wndH;
+
+    m_mapPos= {0,0};
+
     QFile file {path};
     file.open(QIODevice::ReadOnly);
     QByteArray jsonData = file.readAll();
     file.close();
 
     QJsonDocument doc = QJsonDocument::fromJson(jsonData);
-    m_mainObject =doc.object();
-    m_layers =m_mainObject["layers"].toArray();
+    m_jsonDoc =doc.object();
+    m_layers =m_jsonDoc["layers"].toArray();
+
+    //it happens objects are always first element in "layers" array from Tiled app json.
     QJsonObject objects = m_layers.at(0).toObject();
     m_objectsData =objects["objects"].toArray();
 
-    timer.start();
+
+    m_timer.start();
 }
 
-int GameData::getMapX()
+QHash<QString, QJsonArray> GameData::getEnemies()
 {
 
-    return m_mapPos.rx();
+    QHash<QString, QJsonArray> enemyArrays;
 
-}
-
-const QJsonArray &GameData::getLayers() const
-{
-    return m_layers;
-}
-
-  QJsonArray GameData::getSKeletonPos()
-{
-
-     QJsonObject&& tempObj{};
-
-    for (int i =0 ; i<m_layers.size();++i)
+    for (const QJsonValue& layer : m_layers)
     {
+        QJsonObject layerObj = layer.toObject();
+        QString enemyType = layerObj["name"].toString();
 
-         tempObj = m_layers[i].toObject();
-        if(tempObj["name"]=="Skeleton")
-            break;
+        if( enemyType == "Skeleton" || "Mushroom" || "Goblin" || "Flying Eye")
+            enemyArrays[enemyType] = layerObj["objects"].toArray();
+
+
     }
 
 
+    return enemyArrays;
+}
 
-   QJsonArray&& arrOfSkel = !tempObj["objects"].isNull() ? tempObj["objects"].toArray() : QJsonArray{};
+QVariantMap GameData::getEnemiesForQML()
+{
 
+    QHash<QString, QJsonArray> enemyData = getEnemies();
+    QVariantMap resultMap;
 
-
-   return arrOfSkel;
-
-
-  }
-
-  QJsonArray GameData::getDeadZonePos()
-  {
-      QJsonObject&& tempObj{};
-
-     for (int i =0 ; i<m_layers.size();++i)
+     for (auto it = enemyData.constBegin(); it != enemyData.constEnd(); ++it)
      {
-
-          tempObj = m_layers[i].toObject();
-         if(tempObj["name"]=="DeadZone")
-             break;
-     }
+         resultMap.insert(it.key(), QVariant::fromValue(it.value()));
+     }    
 
 
+     return resultMap;
 
-    QJsonArray&& arrOfDeadZone = !tempObj["objects"].isNull() ? tempObj["objects"].toArray() : QJsonArray{};
+}
 
 
+const QPoint &GameData::mapPos() const
+{
+    return m_mapPos;
+}
 
-    return arrOfDeadZone;
 
-  }
+bool GameData::lbutton() const
+{
+    return m_mbuttons.left;
+}
+
+bool GameData::rbutton() const
+{
+    return m_mbuttons.right;
+}
+
+void GameData::setRbutton(bool val)
+{   
+    m_mbuttons.right=val;
+    emit rbuttonChanged();
+}
+
+void GameData::setLbutton(bool val)
+{    
+    m_mbuttons.left=val;
+    emit lbuttonChanged();
+}
 
 double GameData::getCurrentTime()
 {
-    return timer.elapsed() / 1000.0;
+    return m_timer.elapsed() / 1000.0;
+}
 
+void GameData::setMapPos(QPoint &pos)
+{
+    if(m_mapPos!=pos)
+    {
+        m_mapPos=pos;
+        emit mapPosChanged();
+    }
 }
 
 

@@ -1,104 +1,295 @@
 #include "player.h"
 
 
-int yground = 324-15*1.3;
-const double VERTICAL_TOLERANCE = 10.0;
-const double GRACE_PERIOD = 0.01;
 
-
-
-Player::Player(const QString& path , const QPoint& mapPos, int ww, int wh, int mW, int mH, const QPoint &pos, int w, int h, int xsp, int ysp, QObject *parent) :
-    GameData(path, mapPos, ww, wh , mW, mH), m_pos{pos}, m_w{int(w*1.3)}, m_h{int(h*1.3)}, m_xspeed {xsp}, m_yspeed {ysp} {}
-
-int Player::getPosX() const
+Player::Player() :GameData(GameConstants::path, GameConstants::wndW, GameConstants::wndH)
 {
-    return m_pos.x();
+
+    m_w=GameConstants::playerW;
+    m_h=GameConstants::playerH;
+
+    m_pos={10,GameConstants::mapGround};
+    m_gravity=3;
+    m_xspeed=4;
+    m_yspeed=0;
+    m_plAttacks=false;
+    m_isOnPlatform=false;
+    m_isjumping=false;
+    m_isOnRope=false;
+    m_health=300;
 }
 
-int Player::getPosY() const
+
+const QPoint &Player::pos() const
 {
-    return m_pos.y();
+    return m_pos;
+}
+
+bool Player::isOnRope() const
+{
+    return m_isOnRope;
+
+}
+
+bool Player::isJumping() const
+{
+    return m_isjumping;
+}
+
+bool Player::collisionAtPos(double newX, double newY)
+{
+
+    for (int i=0; i<m_objectsData.size(); ++i)
+        {
+            QJsonObject object = m_objectsData[i].toObject();
+            double x = object["x"].toDouble()+m_mapPos.x();;
+            double y = object["y"].toDouble();
+            double w = object["width"].toDouble();
+            double h = object["height"].toDouble();
+            QString rope =object["name"].toString();
+
+
+
+            if ((newX + m_w >= x && newX+(GameConstants::xoffsetLeft+GameConstants::xoffsetRight) < x + w) && (newY + m_h-GameConstants::yoffset >= y && newY < y + h)
+                   && rope!="rope")
+            {
+                return true;
+            }
+
+        }
+
+        return false;
+
 }
 
 void Player::moveRight()
-{
-    int predictedX = m_pos.rx()+m_xspeed ;
+{    
 
-    if (!collisionAtPosition(predictedX, m_pos.y()-2))
+    int predictedX = m_pos.rx()+m_xspeed-GameConstants::xoffsetRight;
+    //int predictedX=m_pos.rx()+m_xspeed-GameConstants::xoffsetLeft;
+
+
+    if (!collisionAtPos(predictedX, m_pos.ry()) &&!m_isOnRope)
     {
         if (m_pos.x() < m_wndW / 2 )
         {
-            m_pos.rx() += m_xspeed;
+            QPoint newPos ={m_pos.rx() + m_xspeed, m_pos.ry()};
+            setPos(newPos);
 
         }
 
         else if (m_mapPos.x() > -(m_mapW - m_wndW))
         {
-            m_mapPos.rx() -= m_xspeed;
-            m_mapPos.rx() = std::max(m_mapPos.x(), -(m_mapW - m_wndW));
+            int newMapPosX=m_mapPos.rx() - m_xspeed;
+            newMapPosX = std::max(newMapPosX, -(m_mapW - m_wndW));
+            QPoint newMapPos = {newMapPosX, m_mapPos.ry()};
+            //m_mapPos.rx()=newMapPosX;
+            setMapPos(newMapPos);
         }
 
         else if (m_pos.x() + m_w < m_wndW )
         {
-            m_pos.rx() += m_xspeed;
+            QPoint newPos = {m_pos.rx() + m_xspeed, m_pos.ry()};
+            setPos(newPos);
 
         }
 
+        return;
+
     }
 
-    emit posXChanged();
+    if (m_isOnRope)
+    {
+        setIsOnRope(false);
 
+        if (m_pos.x() < m_wndW / 2 )
+        {
+            QPoint newPos ={m_pos.rx() + m_xspeed+14, m_pos.ry()};
+            setPos(newPos);
 
+        }
+
+        else if (m_mapPos.x() > -(m_mapW - m_wndW))
+        {
+            int newMapPosX=m_mapPos.rx() - m_xspeed-14;
+            newMapPosX = std::max(newMapPosX, -(m_mapW - m_wndW));
+            QPoint newMapPos = {newMapPosX, m_mapPos.ry()};
+            //m_mapPos.rx()=newMapPosX;
+            setMapPos(newMapPos);
+        }
+
+        else if (m_pos.x() + m_w < m_wndW )
+        {
+            QPoint newPos = {m_pos.rx() + m_xspeed+14, m_pos.ry()};
+            setPos(newPos);
+
+        }
+
+        return;
+
+    }
 }
 
 void Player::moveLeft()
 {
-    int predictedX = m_pos.rx()-m_xspeed ;
+    int predictedX = m_pos.rx()-m_xspeed -GameConstants::xoffsetRight;
+    //int predictedX=m_pos.rx()+m_xspeed-GameConstants::xoffsetLeft;
 
-    if (!collisionAtPosition(predictedX, m_pos.y()-2))
+
+    if (!collisionAtPos(predictedX, m_pos.y())&&!m_isOnRope)
     {
+
         if (m_pos.x() > m_wndW / 2 - m_w / 2 && m_mapPos.x() < 0 )
         {
-            m_pos.rx() -= m_xspeed;
+            QPoint newPos ={m_pos.rx() - m_xspeed, m_pos.ry()};
+            setPos(newPos);
 
         }
 
         else if (m_mapPos.x() < 0)
         {
-            m_mapPos.rx() += m_xspeed;
-            m_mapPos.rx() = std::min(m_mapPos.x(), 0);
+
+            int newMapPosX=m_mapPos.rx() + m_xspeed;
+            newMapPosX = std::min(newMapPosX,0);
+            QPoint newMapPos = {newMapPosX, m_mapPos.ry()};
+            //m_mapPos.rx()=newMapPosX;
+            setMapPos(newMapPos);
         }
 
         else if (m_pos.x() > 0 )
         {
-            m_pos.rx() -= m_xspeed;
+            QPoint newPos = {m_pos.rx() - m_xspeed, m_pos.ry()};
+            setPos(newPos);
 
         }
+
+        return;
     }
 
-    emit posXChanged();
+    if (m_isOnRope)
+    {
+        if (m_pos.x() < m_wndW / 2 )
+        {
+            QPoint newPos ={m_pos.rx() - m_xspeed-12, m_pos.ry()};
+            setPos(newPos);
 
+        }
+
+        else if (m_mapPos.x() > -(m_mapW - m_wndW))
+        {
+            int newMapPosX=m_mapPos.rx() + m_xspeed+12;
+            newMapPosX = std::max(newMapPosX, -(m_mapW - m_wndW));
+            QPoint newMapPos = {newMapPosX, m_mapPos.ry()};
+            //m_mapPos.rx()=newMapPosX;
+            setMapPos(newMapPos);
+        }
+
+        else if (m_pos.x() + m_w < m_wndW )
+        {
+            QPoint newPos = {m_pos.rx() - m_xspeed-12, m_pos.ry()};
+            setPos(newPos);
+
+        }
+
+        return;
+
+    }
+
+
+}
+
+void Player::setPos(const QPoint &pos)
+{
+    if(m_pos!=pos)
+    {
+        m_pos=pos;
+        emit posChanged();
+    }
+}
+
+void Player::setIsJumping(bool val)
+{
+    m_isjumping=val;
+    emit isJumpingChanged();
+}
+
+void Player::setIsOnRope(bool val)
+{
+    m_isOnRope=val;
+    emit isOnRopeChanged();
 }
 
 void Player::jump()
 {
-    //int yground = 337-m_h*1.3;
 
-    if(m_isOnPlatform || m_pos.y()==yground)
-        m_yspeed=-30;
+    if((m_isOnPlatform || m_pos.y()==GameConstants::mapGround )&&!m_isjumping  )
+    { m_yspeed=-30; setIsJumping(true); setIsOnRope(false); }
+
+    if(m_isOnRope &&!m_isjumping  )
+    { m_yspeed=-25; setIsJumping(true); setIsOnRope(false); }
+
+    qDebug()<<m_pos.y()-m_wndH/2<<'\n';
+
+
 
 }
 
-int Player::collistionVertical()
+void Player::crawlUp()
 {
+    if(m_isOnRope)
+    {
+        QPoint newPos ={m_pos.rx(), m_pos.ry()-1};
+        setPos(newPos);;
 
+    }
+
+}
+
+void Player::crawlDown()
+{
+    if(m_isOnRope)
+    {
+        QPoint newPos ={m_pos.rx(), m_pos.ry()+1};
+        setPos(newPos);;
+
+    }
+
+}
+
+void Player::adjustY(int newY)
+{
+    if (newY < m_wndH / 2)
+    {
+
+        // If the player is above the middle of the window, move the map instead of the player
+        int newMapPosY =  newY-m_mapPos.ry(); //m_mapPos.ry() + m_yspeed;
+        //newMapPosY =   //std::min(newMapPosY, 0); // Prevent the map from scrolling down too far
+        newMapPosY = std::max(newMapPosY, -(m_mapH*2 - m_wndH)); // Prevent the map from scrolling up too far
+        QPoint newMapPos = {m_mapPos.rx(), newMapPosY};
+        setMapPos(newMapPos);
+    }
+
+    else
+    {
+        // If the player is below the middle of the window, move the player
+        newY = std::min(newY, m_wndH - m_h); // Prevent the player from falling below the window
+        QPoint newPos = {m_pos.rx(), newY};
+        setPos(newPos);
+    }
+
+
+
+
+}
+
+int Player::collisionVertical()
+{
     static double lastTimeAbovePlatform = 0;
-    double currentTime = getCurrentTime();
-
+    double currentTime = getCurrentTime();    
     int landingY = 0;
-
-
     m_isOnPlatform=false;
+    setIsOnRope(false);
+    int lastY=m_pos.y();
 
    for (int i=0;i<m_objectsData.size();++i)
    {
@@ -107,213 +298,182 @@ int Player::collistionVertical()
        double y = object["y"].toDouble();
        double w = object["width"].toDouble();
        double h = object["height"].toDouble();
+       QString rope =object["name"].toString();
 
-       bool horOverlap = m_pos.rx() + m_w >= x && m_pos.rx() < x + w;
-       bool verOverlap = m_pos.ry() + m_h >= y-VERTICAL_TOLERANCE  && m_pos.ry() + m_h < y + h;
+       bool horOverlap = m_pos.x()-GameConstants::xoffsetRight + m_w >= x && m_pos.x()-GameConstants::xoffsetRight+(GameConstants::xoffsetLeft+GameConstants::xoffsetRight) < x + w;
+       bool verOverlap = m_pos.ry() + m_h >= y  && m_pos.ry() + m_h < y + h;
 
 
-       if (horOverlap && verOverlap)
+       if (horOverlap && verOverlap &&rope!="rope")
        {
            lastTimeAbovePlatform = currentTime;
            m_isOnPlatform = true;
-           //return y - m_h-2 ;
-           landingY = y - m_h-2 ;
+           landingY = y - m_h -GameConstants::yoffsetForVertColl;
+           setIsOnRope(false);
+           break;
+       }       
 
-       }
 
    }
 
-   if (!m_isOnPlatform && currentTime - lastTimeAbovePlatform <= GRACE_PERIOD)
-       {
-           // If the player is within the grace period and hasn't landed directly
-           qDebug()<<currentTime - lastTimeAbovePlatform;
+   if (!m_isOnPlatform && currentTime - lastTimeAbovePlatform <= GameConstants::GRACE_PERIOD &&!m_isOnRope)
+       {               
            m_isOnPlatform = true;
            return landingY;
        }
 
-
-
-
    return m_isOnPlatform ? landingY : 0;
-   //return 0;
+
+}
+
+void Player::collisionVertRope()
+{
+
+    setIsOnRope(false);
+    int lastX;
+
+
+
+   for (int i=0;i<m_objectsData.size();++i)
+   {
+       QJsonObject object = m_objectsData[i].toObject();
+       double x = object["x"].toDouble()+m_mapPos.x();
+       double y = object["y"].toDouble();
+       double w = object["width"].toDouble();
+       double h = object["height"].toDouble();
+       QString rope =object["name"].toString();
+
+       bool horOverlap = m_pos.x()-GameConstants::xoffsetRight + m_w >= x && m_pos.x()-GameConstants::xoffsetRight+(GameConstants::xoffsetLeft+GameConstants::xoffsetRight) < x + w;
+       bool verOverlap = m_pos.ry() + m_h >= y  && m_pos.ry() + m_h < y + h;
+
+       if(m_pos.x()-GameConstants::xoffsetRight+(GameConstants::xoffsetLeft+GameConstants::xoffsetRight)<=x+w)
+          lastX=x-GameConstants::xoffseLeftCrawl+w/2;
+
+       if(m_pos.x()-GameConstants::xoffsetRight + m_w>=x)
+          lastX=x-GameConstants::xoffseLeftCrawl+w/2-3;
+
+
+       if (horOverlap && verOverlap &&rope=="rope")
+       {
+           setPos(QPoint(lastX,m_pos.y()));
+           m_yspeed=0;
+           setIsOnRope(true);
+           setIsJumping(false);
+           return;
+       }
+       else
+           setIsOnRope(false);
+
+
+   }
+
+   setIsOnRope(false);
+
+
+
+
+
 
 }
 
 void Player::applyGravity()
 {
-    int yPlatform = collistionVertical();
 
-    if(yPlatform!=0 &&m_yspeed>0)
+    int yPlatform = collisionVertical();
+
+
+    if(yPlatform!=0 &&m_yspeed>0 &&!m_isOnRope)
     {
         m_yspeed=0;
         m_pos.ry()=yPlatform;
+        QPoint newY={m_pos.x(),m_pos.ry()};
+        setPos(newY);
         m_isOnPlatform=true;
-        emit posYChanged();
-
+        setIsJumping(false);
+        setIsOnRope(false);
 
     }
 
-
-      //m_yspeed += m_gravity; // apply gravity once in air
-      m_yspeed =std::min(m_yspeed +m_gravity, 25); // apply gravity once in air
-      m_pos.ry() += m_yspeed;
-
+      m_yspeed =std::min(m_yspeed +m_gravity, 20);
+      int newY=m_pos.ry()+m_yspeed;
+      QPoint newPos={m_pos.x(), newY};
 
 
+        //logic for map.y scrolling
+      /*
+      {
 
-    if (m_mbuttons.right &&!m_isOnPlatform &&m_pos.y()<yground )
-        moveRight();
+          if (newY < m_wndH / 2 && m_mapPos.ry()<0 &&!m_isOnPlatformh) {
+                 // Scroll map
+                 int newMapPosY = m_mapPos.ry() - m_yspeed;
+                 newMapPosY = std::min(newMapPosY, 0);
+                 //m_mapPos.setY(newMapPosY);
+                 QPoint mapP = {m_mapPos.x(),newMapPosY };
+                 setMapPos(mapP);
+             }
 
-    if (m_mbuttons.left&&!m_isOnPlatform&&m_pos.y()<yground)
+          else if(newY>m_wndH/2 && m_mapPos.y()>-(m_mapH-m_wndH)&&!m_isOnPlatform)
+          {
+
+                 int newMapPosY = m_mapPos.ry() - m_yspeed;
+                 newMapPosY = std::max(newMapPosY, -(m_mapH-m_wndH));
+                 QPoint mapP = {m_mapPos.x(),newMapPosY };
+                 setMapPos(mapP);
+
+          }
+          else {
+                 // Move player
+                 //newY = std::min(newY, m_wndH - m_h);
+                 newY = std::max(newY, 0);  // Ensure player doesn't go above the map
+                 //m_pos.setY(newY);
+                 newPos={m_pos.x(), newY};
+              setPos(newPos);
+             }
+      }
+          */
+
+
+
+
+
+
+
+      setIsOnRope(false);
+      setPos(newPos);
+
+
+
+
+
+    if (m_mbuttons.right &&!m_isOnPlatform &&m_pos.y()<GameConstants::mapGround)
+       moveRight();
+
+    if (m_mbuttons.left&&!m_isOnPlatform&&m_pos.y()<GameConstants::mapGround)
         moveLeft();
 
 
-     emit posYChanged();
 
+    if (m_pos.y() > GameConstants::mapGround)
+    {       
+        QPoint newY = {m_pos.x(), GameConstants::mapGround};
+        setPos(newY);
+        setIsOnRope(false);
+        m_isOnPlatform=true;
 
-    if (m_pos.y() >= yground)
-    {
-        m_pos.setY(yground);
-        emit posYChanged();
         m_isjumping = false;
+        setIsJumping(false);
         m_yspeed = 0;
-    }
-
-
-}
-
-void Player::setRButton(bool val)
-{
-    m_mbuttons.right=val;
-}
-
-void Player::setLButton(bool val)
-{
-     m_mbuttons.left=val;
-
-}
-
-bool Player::playerMovingRight()
-{
-    return m_mbuttons.right;
-
-}
-
-bool Player::playerMovingLeft()
-{
-    return m_mbuttons.left;
-
-}
-
-bool Player::collisionWithSkeleton(int idx)
-{
-
-    static std::set<int> deadSkels{};
-    deadSkels.insert(idx);
-
-
-    QJsonArray skelArr = getSKeletonPos();
-    QJsonArray deadZnArr = getDeadZonePos();
-    int sk_w = 40;
-    int sk_h =50;
-
-
-    for(int i = 0; i <skelArr.size();++i)
-    {
-        double x = skelArr[i].toObject()["x"].toDouble()+getMapX();
-        double y = skelArr[i].toObject()["y"].toDouble();
-
-        bool leftToPlayer = x+sk_w<m_pos.rx()+m_w ? true : false;
-        bool horOverlap = m_pos.rx() + m_w >= x-20 && m_pos.rx() < x + sk_w;
-        bool verOverlap = m_pos.ry() + m_h >= y-sk_h && m_pos.ry() + m_h < y + sk_h;
-
-        emit idxOfSkeletonDirection(i, leftToPlayer);
-
-        if(deadSkels.find(i)==deadSkels.end())
-        {
-        if(horOverlap &&verOverlap )
-           {
-            //emit playerAttacks(m_plAttacks, i);
-
-            if(!m_plAttacks)
-                m_health-=0.2;
-
-            emit idxOfSkeletonAttack(i, m_plAttacks);
-            emit sendHealth(m_health);
-            return true;
-        }
-        }
 
     }
 
-    for (int i =0; i<deadZnArr.size();++i)
-    {
-        double x = deadZnArr[i].toObject()["x"].toDouble()+getMapX();
-        double y = deadZnArr[i].toObject()["y"].toDouble();
-        double w = deadZnArr[i].toObject()["width"].toDouble();
-        double h = deadZnArr[i].toObject()["height"].toDouble();
-        bool horOverlap = m_pos.rx() +m_w  >= x && m_pos.rx() < x+w ;
-        bool verOverlap = m_pos.ry() + m_h >= y && m_pos.ry()  < y+h ;
 
-        if(horOverlap &&verOverlap )
-        {m_health=0; emit sendHealth(m_health); break;}
-
-    }
-
-    emit idxOfSkeletonAttack(-1, false);
-
-
-
-
-    return false;
 
 }
 
-bool Player::isRightPressed()
+void Player::applyGravityOnRope()
 {
-
-    return m_mbuttons.right;
-
-}
-
-bool Player::isLeftPressed()
-{
-     return m_mbuttons.left;
+    m_yspeed =std::min(m_yspeed +m_gravity-1, 20);
+    QPoint newY={m_pos.x(), m_pos.ry()+m_yspeed};    
+    setPos(newY);
 
 }
-
-void Player::isAttacking(bool attack)
-{
-
-    m_plAttacks=attack;
-}
-
-int Player::getHealth() const
-{
-    return m_health;
-}
-
-bool Player::collisionAtPosition(double newX, double newY)
-{
-
-    for (int i=0; i<m_objectsData.size(); ++i)
-        {
-            QJsonObject object = m_objectsData[i].toObject();
-            double x = object["x"].toDouble()+m_mapPos.x();
-            double y = object["y"].toDouble();
-            double w = object["width"].toDouble();
-            double h = object["height"].toDouble();
-
-
-            if ((newX + m_w >= x && newX < x + w) && (newY + m_h >= y && newY < y + h))
-            {
-                //qDebug() << "coll with obj at" << x << "pl.x"<<m_pos.x()<<" "<<m_w<< '\n';
-                return true;
-            }
-        }
-        return false;
-
-}
-
-
-
