@@ -19,5 +19,6 @@ Increasing the game map is a minor challenge
 *up/left/right* for movement and *1* for attack
 
 
-<img width="486" alt="1" src="https://github.com/sakesfar/Basic_2DPlatformer_Qt_QML/assets/121855106/b24a1a08-f322-4cdc-b0fb-bc024e65aec7">
-<img width="475" alt="3" src="https://github.com/sakesfar/Basic_2DPlatformer_Qt_QML/assets/121855106/3efdc0d9-0c47-4ede-822d-81886a4c2e04">
+<img width="480" alt="girl2" src="https://github.com/sakesfar/Basic_2DPlatformer_Qt_QML/assets/121855106/42005aca-5fa9-4deb-b9cd-916fd60d1794">
+<img width="469" alt="Girl1" src="https://github.com/sakesfar/Basic_2DPlatformer_Qt_QML/assets/121855106/6ead4f5b-0478-4e1a-be4d-0632df7f44c2">
+
