@@ -1,7 +1,7 @@
 # Basic_2DPlatformer_Qt_QML
 This simple 2D game is under development
 
-The game is a refined version of this: https://www.youtube.com/watch?v=m6Tu3m1SwOI
+The game video: [[https://www.youtube.com/watch?v=m6Tu3m1SwOI](https://www.youtube.com/watch?v=K6HBdARQMZs&ab_channel=Sakesfar)]
 with all the major logic in C++ and QML for GUI.
 
 **The following aspects, the ones I consider major, I am currently working on :**
