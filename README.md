@@ -2,7 +2,7 @@
 This simple 2D game is under development.
 **A major caveat to go through is adding y-scrolling to accommodate a bigger gamemap. [ALREADY SOLVED]**
 
-The game video: [[https://www.youtube.com/watch?v=m6Tu3m1SwOI](https://www.youtube.com/watch?v=K6HBdARQMZs&ab_channel=Sakesfar)]
+The game video: [https://www.youtube.com/watch?v=l6gLra8NcuI]
 with all the major logic in C++ and QML for GUI.
 
 **The following aspects, the ones I consider major, I am currently working on :**
